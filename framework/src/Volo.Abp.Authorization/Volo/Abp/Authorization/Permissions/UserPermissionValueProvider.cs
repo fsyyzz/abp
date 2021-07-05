@@ -16,7 +16,7 @@ namespace Volo.Abp.Authorization.Permissions
 
         }
 
-        public async override Task<PermissionGrantResult> CheckAsync(PermissionValueCheckContext context)
+        public override async Task<PermissionGrantResult> CheckAsync(PermissionValueCheckContext context)
         {
             var userId = context.Principal?.FindFirst(AbpClaimTypes.UserId)?.Value;
 
@@ -30,9 +30,10 @@ namespace Volo.Abp.Authorization.Permissions
                 : PermissionGrantResult.Undefined;
         }
 
-        public async override Task<MultiplePermissionGrantResult> CheckAsync(PermissionValuesCheckContext context)
+        public override async Task<MultiplePermissionGrantResult> CheckAsync(PermissionValuesCheckContext context)
         {
-            var permissionNames = context.Permissions.Select(x => x.Name).ToArray();
+            var permissionNames = context.Permissions.Select(x => x.Name).Distinct().ToArray();
+            Check.NotNullOrEmpty(permissionNames, nameof(permissionNames));
 
             var userId = context.Principal?.FindFirst(AbpClaimTypes.UserId)?.Value;
             if (userId == null)

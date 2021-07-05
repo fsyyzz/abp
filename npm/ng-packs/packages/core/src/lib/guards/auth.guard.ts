@@ -13,10 +13,10 @@ export class AuthGuard implements CanActivate {
   canActivate(): Observable<boolean> | boolean | UrlTree {
     const hasValidAccessToken = this.oauthService.hasValidAccessToken();
     if (hasValidAccessToken) {
-      return hasValidAccessToken;
+      return true;
     }
 
-    this.authService.initLogin();
-    return true;
+    this.authService.navigateToLogin();
+    return false;
   }
 }

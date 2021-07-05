@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
 using Volo.Abp.ApiVersioning;
+using Volo.Abp.Application;
 using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.ApiExploring;
 using Volo.Abp.AspNetCore.Mvc.Conventions;
@@ -39,6 +40,7 @@ using Volo.Abp.Json;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.UI;
+using Volo.Abp.UI.Navigation;
 
 namespace Volo.Abp.AspNetCore.Mvc
 {
@@ -47,8 +49,9 @@ namespace Volo.Abp.AspNetCore.Mvc
         typeof(AbpLocalizationModule),
         typeof(AbpApiVersioningAbstractionsModule),
         typeof(AbpAspNetCoreMvcContractsModule),
-        typeof(AbpUiModule),
-        typeof(AbpGlobalFeaturesModule)
+        typeof(AbpUiNavigationModule),
+        typeof(AbpGlobalFeaturesModule),
+        typeof(AbpDddApplicationModule)
         )]
     public class AbpAspNetCoreMvcModule : AbpModule
     {
@@ -154,10 +157,10 @@ namespace Volo.Abp.AspNetCore.Mvc
             context.Services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             //Use DI to create controllers
-            context.Services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
+            mvcBuilder.AddControllersAsServices();
 
             //Use DI to create view components
-            context.Services.Replace(ServiceDescriptor.Singleton<IViewComponentActivator, ServiceBasedViewComponentActivator>());
+            mvcBuilder.AddViewComponentsAsServices();
 
             //Use DI to create razor page
             context.Services.Replace(ServiceDescriptor.Singleton<IPageModelActivatorProvider, ServiceBasedPageModelActivatorProvider>());

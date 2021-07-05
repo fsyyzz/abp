@@ -1,16 +1,14 @@
 import { registerLocaleData } from '@angular/common';
-import { Injectable, Injector, isDevMode, NgZone, Optional, SkipSelf } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store } from '@ngxs/store';
-import { noop, Observable, Subject } from 'rxjs';
+import { Injectable, Injector, isDevMode, Optional, SkipSelf } from '@angular/core';
+import { from, Observable, Subject } from 'rxjs';
 import { filter, map, mapTo, switchMap, tap } from 'rxjs/operators';
-import { ApplicationConfiguration } from '../models/application-configuration';
 import { ABP } from '../models/common';
 import { Config } from '../models/config';
+import { AbpApplicationConfigurationService } from '../proxy/volo/abp/asp-net-core/mvc/application-configurations/abp-application-configuration.service';
+import { ApplicationConfigurationDto } from '../proxy/volo/abp/asp-net-core/mvc/application-configurations/models';
 import { CORE_OPTIONS } from '../tokens/options.token';
 import { createLocalizer, createLocalizerWithFallback } from '../utils/localization-utils';
 import { interpolate } from '../utils/string-utils';
-import { ApplicationConfigurationService } from './application-configuration.service';
 import { ConfigStateService } from './config-state.service';
 import { SessionStateService } from './session-state.service';
 
@@ -23,7 +21,7 @@ export class LocalizationService {
    * Returns currently selected language
    */
   get currentLang(): string {
-    return this.latestLang;
+    return this.latestLang || this.sessionState.getLanguage();
   }
 
   get languageChange$(): Observable<string> {
@@ -32,14 +30,12 @@ export class LocalizationService {
 
   constructor(
     private sessionState: SessionStateService,
-    private store: Store,
     private injector: Injector,
-    private ngZone: NgZone,
     @Optional()
     @SkipSelf()
     otherInstance: LocalizationService,
     private configState: ConfigStateService,
-    private appConfigService: ApplicationConfigurationService,
+    private appConfigService: AbpApplicationConfigurationService,
   ) {
     if (otherInstance) throw new Error('LocalizationService should have only one instance.');
 
@@ -55,33 +51,21 @@ export class LocalizationService {
         ),
         switchMap(lang =>
           this.appConfigService
-            .getConfiguration()
+            .get()
             .pipe(tap(res => this.configState.setState(res)))
             .pipe(mapTo(lang)),
         ),
+        switchMap(lang => from(this.registerLocale(lang).then(() => lang))),
       )
-      .subscribe(lang => {
-        this.registerLocale(lang);
-        this._languageChange$.next(lang);
-      });
+      .subscribe(lang => this._languageChange$.next(lang));
   }
 
   registerLocale(locale: string) {
-    const router = this.injector.get(Router);
-    const { shouldReuseRoute } = router.routeReuseStrategy;
-    router.routeReuseStrategy.shouldReuseRoute = () => false;
-    router.navigated = false;
-
     const { registerLocaleFn }: ABP.Root = this.injector.get(CORE_OPTIONS);
 
     return registerLocaleFn(locale).then(module => {
       if (module?.default) registerLocaleData(module.default);
       this.latestLang = locale;
-
-      this.ngZone.run(async () => {
-        await router.navigateByUrl(router.url).catch(noop);
-        router.routeReuseStrategy.shouldReuseRoute = shouldReuseRoute;
-      });
     });
   }
 
@@ -146,7 +130,7 @@ export class LocalizationService {
 }
 
 function getLocalization(
-  state: ApplicationConfiguration.Response,
+  state: ApplicationConfigurationDto,
   key: string | Config.LocalizationWithDefault,
   ...interpolateParams: string[]
 ) {

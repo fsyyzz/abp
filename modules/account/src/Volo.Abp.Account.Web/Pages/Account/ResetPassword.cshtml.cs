@@ -1,10 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp.Auditing;
 using Volo.Abp.Identity;
-using Volo.Abp.MultiTenancy;
 using Volo.Abp.Validation;
 
 namespace Volo.Abp.Account.Web.Pages.Account
@@ -49,32 +49,29 @@ namespace Volo.Abp.Account.Web.Pages.Account
         [DisableAuditing]
         public string ConfirmPassword { get; set; }
 
-        protected virtual ITenantResolveResultAccessor TenantResolveResultAccessor { get; }
-
-        public ResetPasswordModel(ITenantResolveResultAccessor tenantResolveResultAccessor)
-        {
-            TenantResolveResultAccessor = tenantResolveResultAccessor;
-        }
-
         public virtual Task<IActionResult> OnGetAsync()
         {
-            //TODO: It would be good to try to switch tenant if needed
-            CheckCurrentTenant(TenantId);
+            if (SwitchTenant(TenantId))
+            {
+                return Task.FromResult<IActionResult>(Redirect(HttpContext.Request.GetEncodedUrl()));
+            }
+
             return Task.FromResult<IActionResult>(Page());
         }
 
         public virtual async Task<IActionResult> OnPostAsync()
         {
-            ValidateModel();
-
             try
             {
+                ValidateModel();
+
                 await AccountAppService.ResetPasswordAsync(
                     new ResetPasswordDto
                     {
                         UserId = UserId,
                         ResetToken = ResetToken,
-                        Password = Password
+                        Password = Password,
+                        TenantId = TenantId
                     }
                 );
             }
@@ -82,11 +79,15 @@ namespace Volo.Abp.Account.Web.Pages.Account
             {
                 if (!string.IsNullOrWhiteSpace(e.Message))
                 {
-                    Alerts.Warning(e.Message);
+                    Alerts.Warning(GetLocalizeExceptionMessage(e));
                     return Page();
                 }
 
                 throw;
+            }
+            catch (AbpValidationException e)
+            {
+                return Page();
             }
 
             //TODO: Try to automatically login!
@@ -101,7 +102,8 @@ namespace Volo.Abp.Account.Web.Pages.Account
         {
             if (!Equals(Password, ConfirmPassword))
             {
-                ModelState.AddModelError("ConfirmPassword", L["'{0}' and '{1}' do not match.", "ConfirmPassword", "Password"]);
+                ModelState.AddModelError("ConfirmPassword",
+                    L["'{0}' and '{1}' do not match.", "ConfirmPassword", "Password"]);
             }
 
             base.ValidateModel();

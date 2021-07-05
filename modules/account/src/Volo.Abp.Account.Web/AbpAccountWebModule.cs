@@ -3,11 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Account.Localization;
 using Volo.Abp.Account.Web.Pages.Account;
 using Volo.Abp.Account.Web.ProfileManagement;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Toolbars;
 using Volo.Abp.AutoMapper;
+using Volo.Abp.ExceptionHandling;
 using Volo.Abp.Identity.AspNetCore;
 using Volo.Abp.Modularity;
 using Volo.Abp.UI.Navigation;
@@ -19,7 +21,9 @@ namespace Volo.Abp.Account.Web
         typeof(AbpAccountHttpApiModule),
         typeof(AbpIdentityAspNetCoreModule),
         typeof(AbpAutoMapperModule),
-        typeof(AbpAspNetCoreMvcUiThemeSharedModule)
+        typeof(AbpAspNetCoreMvcUiThemeSharedModule),
+        typeof(AbpAspNetCoreMultiTenancyModule),
+        typeof(AbpExceptionHandlingModule)
         )]
     public class AbpAccountWebModule : AbpModule
     {

@@ -24,7 +24,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Dropdown
             _serviceProvider = serviceProvider;
         }
 
-        public async override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             var content = await output.GetChildContentAsync();
 
@@ -70,7 +70,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Dropdown
 
             var buttonTag = await abpButtonTagHelper.ProcessAndGetOutputAsync(attributes, context, "button", TagMode.StartTagAndEndTag);
 
-            buttonTag.PreContent.SetHtmlContent(content.GetContent());
+            buttonTag.PreContent.SetHtmlContent(content);
 
             if ((TagHelper.NavLink ?? false) || (TagHelper.Link ?? false))
             {

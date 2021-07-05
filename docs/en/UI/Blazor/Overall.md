@@ -93,6 +93,8 @@ These libraries are selected as the base libraries and available to the applicat
 
 > Bootstrap's JavaScript part is not used since the Blazorise library already provides the necessary functionalities to the Bootstrap components in a native way.
 
+> Beginning from June, 2021, the Blazorise library has dual licenses; open source & commercial. Based on your yearly revenue, you may need to buy a commercial license. See [this post](https://blazorise.com/news/blazorise-commercial-going-live/) for the announcement.
+
 ### The Layout
 
 The themes provide the layout. So, you have a responsive layout with the standard features already implemented. The screenshot below has taken from the layout of the [Basic Theme](Basic-Theme.md):
@@ -149,6 +151,12 @@ ABP makes this possible by auto registering components to and resolving the comp
 > You can still continue to use property injection and the standard `[Inject]` approach if you prefer.
 
 Resolving a component from the Dependency Injection system makes it possible to easily replace components of a depended module.
+
+## Error Handling
+
+Blazor, by default, shows a yellow line at the bottom of the page if any unhandled exception occurs. However, this is not useful in a real application.
+
+ABP provides an [automatic error handling system](Error-Handling.md) for the Blazor UI.
 
 ## Customization
 

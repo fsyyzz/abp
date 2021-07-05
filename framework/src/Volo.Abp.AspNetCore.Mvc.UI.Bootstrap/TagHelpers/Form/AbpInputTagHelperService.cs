@@ -26,9 +26,14 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             _tagHelperLocalizer = tagHelperLocalizer;
         }
 
-        public async override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             var (innerHtml, isCheckBox) = await GetFormInputGroupAsHtmlAsync(context, output);
+
+            if (isCheckBox)
+            {
+                TagHelper.ViewContext.CheckBoxHiddenInputRenderMode = TagHelper.CheckBoxHiddenInputRenderMode;
+            }
 
             var order = TagHelper.AspFor.ModelExplorer.GetDisplayOrder();
 
@@ -52,7 +57,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
                 output.Attributes.AddClass(isCheckBox ? "custom-checkbox" : "form-group");
                 output.Attributes.AddClass(isCheckBox ? "custom-control" : "");
                 output.Attributes.AddClass(isCheckBox ? "mb-2" : "");
-                output.Content.SetHtmlContent(output.Content.GetContent() + innerHtml);
+                output.Content.AppendHtml(innerHtml);
             }
         }
 
@@ -317,6 +322,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             var small = new TagBuilder("small");
             small.Attributes.Add("id", idAttr?.Value?.ToString() + "InfoText");
             small.AddCssClass("form-text text-muted");
+            small.InnerHtml.Append(localizedText);
 
             return small.ToHtmlString();
         }

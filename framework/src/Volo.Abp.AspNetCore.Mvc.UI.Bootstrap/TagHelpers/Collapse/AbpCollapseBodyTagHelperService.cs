@@ -6,7 +6,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Collapse
 {
     public class AbpCollapseBodyTagHelperService : AbpTagHelperService<AbpCollapseBodyTagHelper>
     {
-        public async override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.TagName = "div";
             output.Attributes.AddClass("collapse");
@@ -22,9 +22,9 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Collapse
                 output.Attributes.AddClass("multi-collapse");
             }
 
-            var innerContent = (await output.GetChildContentAsync()).GetContent();
+            var childContent = await output.GetChildContentAsync();
 
-            output.Content.SetHtmlContent(innerContent);
+            output.Content.SetHtmlContent(childContent);
         }
     }
 }

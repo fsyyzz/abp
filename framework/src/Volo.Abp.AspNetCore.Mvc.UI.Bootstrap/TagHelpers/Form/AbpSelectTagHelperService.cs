@@ -36,9 +36,11 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             _stringLocalizerFactory = stringLocalizerFactory;
         }
 
-        public async override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            var innerHtml = await GetFormInputGroupAsHtmlAsync(context, output);
+            var childContent = await output.GetChildContentAsync();
+
+            var innerHtml = await GetFormInputGroupAsHtmlAsync(context, output, childContent);
 
             var order = TagHelper.AspFor.ModelExplorer.GetDisplayOrder();
 
@@ -58,9 +60,9 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             }
         }
 
-        protected virtual async Task<string> GetFormInputGroupAsHtmlAsync(TagHelperContext context, TagHelperOutput output)
+        protected virtual async Task<string> GetFormInputGroupAsHtmlAsync(TagHelperContext context, TagHelperOutput output, TagHelperContent childContent)
         {
-            var selectTag = await GetSelectTagAsync(context, output);
+            var selectTag = await GetSelectTagAsync(context, output, childContent);
             var selectAsHtml = selectTag.Render(_encoder);
             var label = await GetLabelAsHtmlAsync(context, output, selectTag);
             var validation = await GetValidationAsHtmlAsync(context, output, selectTag);
@@ -74,7 +76,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             return "<div class=\"form-group\">" + Environment.NewLine + innerHtml + Environment.NewLine + "</div>";
         }
 
-        protected virtual async Task<TagHelperOutput> GetSelectTagAsync(TagHelperContext context, TagHelperOutput output)
+        protected virtual async Task<TagHelperOutput> GetSelectTagAsync(TagHelperContext context, TagHelperOutput output, TagHelperContent childContent)
         {
             var selectTagHelper = new SelectTagHelper(_generator)
             {
@@ -86,16 +88,18 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             {
                 selectTagHelper.Items = GetSelectItems(context, output);
             }
-            else
+            else if(!TagHelper.AutocompleteSelectedItemName.IsNullOrEmpty())
             {
-                selectTagHelper.Items = new SelectListItem[]
-                    {
-                        new SelectListItem(TagHelper.AutocompleteSelectedItemName,TagHelper.AutocompleteSelectedItemValue,true)
-                    };
+                selectTagHelper.Items = new[]
+                {
+                    new SelectListItem(TagHelper.AutocompleteSelectedItemName,
+                        TagHelper.AutocompleteSelectedItemValue, false)
+                };
             }
 
             var selectTagHelperOutput = await selectTagHelper.ProcessAndGetOutputAsync(GetInputAttributes(context, output), context, "select", TagMode.StartTagAndEndTag);
 
+            selectTagHelperOutput.Content.SetHtmlContent(childContent);
             selectTagHelperOutput.Attributes.AddClass("form-control");
             selectTagHelperOutput.Attributes.AddClass(GetSize(context, output));
             AddDisabledAttribute(selectTagHelperOutput);
@@ -164,11 +168,16 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
 
         protected virtual async Task<string> GetLabelAsHtmlAsync(TagHelperContext context, TagHelperOutput output, TagHelperOutput selectTag)
         {
+            if (TagHelper.SuppressLabel)
+            {
+                return string.Empty;
+            }
+
             if (!string.IsNullOrEmpty(TagHelper.Label))
             {
                 var label = new TagBuilder("label");
                 label.Attributes.Add("for", GetIdAttributeValue(selectTag));
-                label.InnerHtml.Append(TagHelper.Label);
+                label.InnerHtml.AppendHtml(TagHelper.Label);
 
                 return label.ToHtmlString() + GetRequiredSymbol(context, output);
             }
@@ -232,6 +241,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Bootstrap.TagHelpers.Form
             var small = new TagBuilder("small");
             small.Attributes.Add("id", idAttr?.Value?.ToString() + "InfoText");
             small.AddCssClass("form-text text-muted");
+            small.InnerHtml.Append(localizedText);
 
             return small.ToHtmlString();
         }

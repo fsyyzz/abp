@@ -63,11 +63,11 @@ A theme is simply a Razor Class Library.
 
 ### The Easy Way
 
-The easiest way to create a new theme is to copy the [Basic Theme Source Code](https://github.com/abpframework/abp/tree/dev/framework/src/Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme) and customize it. Once you get a copy of the theme in your solution, remove the `Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic` NuGet package and reference to the local project.
+The easiest way to create a new theme is to copy the [Basic Theme Source Code](https://github.com/abpframework/abp/blob/dev/modules/basic-theme/src/Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme) and customize it. Once you get a copy of the theme in your solution, remove the `Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme` NuGet package and reference to the local project.
 
 ### Global Styles / Scripts
 
-A theme generally needs to add a global style to the page. ABP provides a system to manage the [Global Styles and Scripts](Global-Scripts-Styles.md). A theme can implement the `IBundleContributer` to add global style or script files to the page.
+A theme generally needs to add a global style to the page. ABP provides a system to manage the [Global Styles and Scripts](Global-Scripts-Styles.md). A theme can implement the `IBundleContributor` to add global style or script files to the page.
 
 **Example: Adding a style to the page**
 
@@ -76,7 +76,7 @@ using Volo.Abp.Bundling;
 
 namespace MyTheme
 {
-    public class MyThemeBundleContributer : IBundleContributer
+    public class MyThemeBundleContributor : IBundleContributor
     {
         public void AddScripts(BundleContext context)
         {

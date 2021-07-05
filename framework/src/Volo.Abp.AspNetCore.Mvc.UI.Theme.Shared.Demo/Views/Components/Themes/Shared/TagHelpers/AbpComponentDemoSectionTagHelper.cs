@@ -28,7 +28,7 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Demo.Views.Components.Themes.S
             _guidGenerator = guidGenerator;
         }
 
-        public async override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.TagName = null;
 
@@ -120,9 +120,9 @@ namespace Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Demo.Views.Components.Themes.S
 
                     return sourceBuilder.ToString();
                 }
-                else if (sourceBuilder != null)
+                else 
                 {
-                    sourceBuilder.AppendLine(line);
+                    sourceBuilder?.AppendLine(line);
                 }
             }
 

@@ -30,8 +30,9 @@ namespace Volo.Abp.EventBus.Rebus
             ICurrentTenant currentTenant,
             IBus rebus,
             IOptions<AbpDistributedEventBusOptions> abpDistributedEventBusOptions,
-            IOptions<AbpRebusEventBusOptions> abpEventBusRebusOptions) :
-            base(serviceScopeFactory, currentTenant)
+            IOptions<AbpRebusEventBusOptions> abpEventBusRebusOptions,
+            IEventErrorHandler errorHandler) :
+            base(serviceScopeFactory, currentTenant, errorHandler)
         {
             Rebus = rebus;
             AbpRebusEventBusOptions = abpEventBusRebusOptions.Value;
@@ -124,7 +125,7 @@ namespace Volo.Abp.EventBus.Rebus
             return Subscribe(typeof(TEvent), handler);
         }
 
-        public async override Task PublishAsync(Type eventType, object eventData)
+        public override async Task PublishAsync(Type eventType, object eventData)
         {
             await AbpRebusEventBusOptions.Publish(Rebus, eventType, eventData);
         }

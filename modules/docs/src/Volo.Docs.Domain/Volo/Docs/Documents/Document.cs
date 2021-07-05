@@ -55,7 +55,7 @@ namespace Volo.Docs.Documents
             [NotNull] string fileName,
             [NotNull] string content,
             [NotNull] string format,
-            [NotNull] string editLink,
+            [CanBeNull] string editLink,
             [NotNull] string rootUrl,
             [NotNull] string rawRootUrl,
             [NotNull] string localDirectory,
@@ -74,7 +74,7 @@ namespace Volo.Docs.Documents
             FileName = Check.NotNullOrWhiteSpace(fileName, nameof(fileName));
             Content = Check.NotNullOrWhiteSpace(content, nameof(content));
             Format = Check.NotNullOrWhiteSpace(format, nameof(format));
-            EditLink = Check.NotNullOrWhiteSpace(editLink, nameof(editLink));
+            EditLink = editLink;
             RootUrl = Check.NotNullOrWhiteSpace(rootUrl, nameof(rootUrl));
             RawRootUrl = Check.NotNullOrWhiteSpace(rawRootUrl, nameof(rawRootUrl));
             LocalDirectory = Check.NotNull(localDirectory, nameof(localDirectory));
@@ -87,9 +87,9 @@ namespace Volo.Docs.Documents
             Contributors = new List<DocumentContributor>();
         }
 
-        public virtual void AddContributor(string username, string userProfileUrl, string avatarUrl)
+        public virtual void AddContributor(string username, string userProfileUrl, string avatarUrl, int commitCount = 1)
         {
-            Contributors.AddIfNotContains(new DocumentContributor(Id, username, userProfileUrl, avatarUrl));
+            Contributors.AddIfNotContains(new DocumentContributor(Id, username, userProfileUrl, avatarUrl, commitCount));
         }
 
         public virtual void RemoveAllContributors()
